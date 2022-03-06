@@ -1,19 +1,18 @@
-import Form from '../components/Form'
+import Form from "../components/Form";
 
-const NewPet = () => {
-  const petForm = {
-    name: '',
-    owner_name: '',
-    species: '',
-    age: 0,
-    poddy_trained: false,
-    diet: [],
-    image_url: '',
-    likes: [],
-    dislikes: [],
-  }
+const NewPokemon = () => {
+  const pokemonForm = {
+    name: "",
+    rank: 0,
+    shadow: false,
+    shiny: true,
+    fastMove: "",
+    chargedMoves: [],
+    dexNo: 0,
+    league: "",
+  };
 
-  return <Form formId="add-pet-form" petForm={petForm} />
-}
+  return <Form formId="add-pet-form" pokemonForm={pokemonForm} />;
+};
 
-export default NewPet
+export default NewPokemon;

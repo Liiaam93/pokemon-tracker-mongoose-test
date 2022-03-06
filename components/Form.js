@@ -1,107 +1,115 @@
-import { useState } from 'react'
-import { useRouter } from 'next/router'
-import { mutate } from 'swr'
+import { useState } from "react";
+import { useRouter } from "next/router";
+import { mutate } from "swr";
+import {
+  Button,
+  Input,
+  Radio,
+  RadioGroup,
+  Select,
+  Stack,
+} from "@chakra-ui/react";
 
-const Form = ({ formId, petForm, forNewPet = true }) => {
-  const router = useRouter()
-  const contentType = 'application/json'
-  const [errors, setErrors] = useState({})
-  const [message, setMessage] = useState('')
+const Form = ({ formId, pokemonForm, forNewPokemon = true }) => {
+  const router = useRouter();
+  const contentType = "application/json";
+  const [errors, setErrors] = useState({});
+  const [message, setMessage] = useState("");
 
   const [form, setForm] = useState({
-    name: petForm.name,
-    owner_name: petForm.owner_name,
-    species: petForm.species,
-    age: petForm.age,
-    poddy_trained: petForm.poddy_trained,
-    diet: petForm.diet,
-    image_url: petForm.image_url,
-    likes: petForm.likes,
-    dislikes: petForm.dislikes,
-  })
+    name: pokemonForm.name,
+    rank: pokemonForm.age,
+    shadow: pokemonForm.shadow,
+    shiny: pokemonForm.shiny,
+    dexNo: pokemonForm.dexNo,
+    fastMove: pokemonForm.fastMove,
+    chargedMoves: pokemonForm.chargedMoves,
+    league: pokemonForm.league,
+  });
 
   /* The PUT method edits an existing entry in the mongodb database. */
   const putData = async (form) => {
-    const { id } = router.query
+    const { id } = router.query;
 
     try {
-      const res = await fetch(`/api/pets/${id}`, {
-        method: 'PUT',
+      const res = await fetch(`/api/pokemons/${id}`, {
+        method: "PUT",
         headers: {
           Accept: contentType,
-          'Content-Type': contentType,
+          "Content-Type": contentType,
         },
         body: JSON.stringify(form),
-      })
+      });
 
       // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
-        throw new Error(res.status)
+        throw new Error(res.status);
       }
 
-      const { data } = await res.json()
+      const { data } = await res.json();
 
-      mutate(`/api/pets/${id}`, data, false) // Update the local data without a revalidation
-      router.push('/')
+      mutate(`/api/pokemons/${id}`, data, false); // Update the local data without a revalidation
+      router.push("/");
     } catch (error) {
-      setMessage('Failed to update pet')
+      setMessage("Failed to update pet");
     }
-  }
+  };
 
   /* The POST method adds a new entry in the mongodb database. */
   const postData = async (form) => {
     try {
-      const res = await fetch('/api/pets', {
-        method: 'POST',
+      const res = await fetch("/api/pokemons", {
+        method: "POST",
         headers: {
           Accept: contentType,
-          'Content-Type': contentType,
+          "Content-Type": contentType,
         },
         body: JSON.stringify(form),
-      })
+      });
 
       // Throw error with status code in case Fetch API req failed
       if (!res.ok) {
-        throw new Error(res.status)
+        throw new Error(res.status);
       }
 
-      router.push('/')
+      router.push("/");
     } catch (error) {
-      setMessage('Failed to add pet')
+      setMessage("Failed to add pet");
     }
-  }
+  };
 
   const handleChange = (e) => {
-    const target = e.target
+    const target = e.target;
     const value =
-      target.name === 'poddy_trained' ? target.checked : target.value
-    const name = target.name
+      target.name === "shadow" || target.name === "shiny"
+        ? target.checked
+        : target.value;
+
+    const name = target.name;
 
     setForm({
       ...form,
       [name]: value,
-    })
-  }
+    });
+  };
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    const errs = formValidate()
+    e.preventDefault();
+    const errs = formValidate();
     if (Object.keys(errs).length === 0) {
-      forNewPet ? postData(form) : putData(form)
+      forNewPokemon ? postData(form) : putData(form);
     } else {
-      setErrors({ errs })
+      setErrors({ errs });
     }
-  }
+  };
 
   /* Makes sure pet info is filled for pet name, owner name, species, and image url*/
   const formValidate = () => {
-    let err = {}
-    if (!form.name) err.name = 'Name is required'
-    if (!form.owner_name) err.owner_name = 'Owner is required'
-    if (!form.species) err.species = 'Species is required'
-    if (!form.image_url) err.image_url = 'Image URL is required'
-    return err
-  }
+    let err = {};
+    if (!form.name) err.name = "Name is required";
+    if (!form.dexNo) err.dexNo = "Dex No is required";
+    return err;
+  };
 
   return (
     <>
@@ -115,79 +123,85 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
           onChange={handleChange}
           required
         />
-
-        <label htmlFor="owner_name">Owner</label>
-        <input
-          type="text"
-          maxLength="20"
-          name="owner_name"
-          value={form.owner_name}
-          onChange={handleChange}
+        <label htmlFor="league">League</label>
+        <Select
           required
-        />
-
-        <label htmlFor="species">Species</label>
-        <input
-          type="text"
-          maxLength="30"
-          name="species"
-          value={form.species}
+          placeholder={"select a league"}
+          name="league"
+          value={form.league}
           onChange={handleChange}
-          required
-        />
-
-        <label htmlFor="age">Age</label>
+        >
+          <option name="league" value="Great">
+            Great
+          </option>
+          <option name="league" value="Ultra">
+            Ultra
+          </option>
+          <option name="league" value="Master">
+            Master
+          </option>
+        </Select>
+        {/* <RadioGroup name="league" value={form.league} onChange={handleChange}>
+          <Stack>
+            <Radio name="league" value="Great">
+              Great
+            </Radio>
+            <Radio name="league" value="Ultra">
+              Ultra
+            </Radio>
+            <Radio name="league" value="Master">
+              Master
+            </Radio>
+          </Stack>
+        </RadioGroup> */}
+        <label htmlFor="rank">Rank</label>
         <input
           type="number"
-          name="age"
-          value={form.age}
+          name="rank"
+          value={form.rank}
           onChange={handleChange}
         />
-
-        <label htmlFor="poddy_trained">Potty Trained</label>
+        <label htmlFor="shadow">Shadow</label>
         <input
           type="checkbox"
-          name="poddy_trained"
-          checked={form.poddy_trained}
+          name="shadow"
+          checked={form.shadow}
           onChange={handleChange}
         />
-
-        <label htmlFor="diet">Diet</label>
-        <textarea
-          name="diet"
-          maxLength="60"
-          value={form.diet}
-          onChange={handleChange}
-        />
-
-        <label htmlFor="image_url">Image URL</label>
+        <label htmlFor="shiny">Shiny</label>
         <input
-          type="url"
-          name="image_url"
-          value={form.image_url}
+          type="checkbox"
+          name="shiny"
+          checked={form.shiny}
+          onChange={handleChange}
+        />
+        <label htmlFor="fastMove">Fast Move</label>
+        <Input
+          name="fastMove"
+          maxLength="60"
+          value={form.fastMove}
+          onChange={handleChange}
+        />
+        <label htmlFor="chargedMoves">Charged Moves</label>
+        <textarea
+          name="chargedMoves"
+          maxLength="60"
+          value={form.chargedMoves}
+          onChange={handleChange}
+        />
+        <label htmlFor="dexNo">Dex No</label>
+        <Input
+          type="number"
+          name="dexNo"
+          min={1}
+          max={900}
+          value={form.dexNo}
           onChange={handleChange}
           required
         />
-
-        <label htmlFor="likes">Likes</label>
-        <textarea
-          name="likes"
-          maxLength="60"
-          value={form.likes}
-          onChange={handleChange}
-        />
-
-        <label htmlFor="dislikes">Dislikes</label>
-        <textarea
-          name="dislikes"
-          maxLength="60"
-          value={form.dislikes}
-          onChange={handleChange}
-        />
-
-        <button type="submit" className="btn">
+        <Button type="submit" className="btn">
           Submit
-        </button>
+        </Button>
       </form>
       <p>{message}</p>
       <div>
@@ -196,7 +210,7 @@ const Form = ({ formId, petForm, forNewPet = true }) => {
         ))}
       </div>
     </>
-  )
-}
+  );
+};
 
-export default Form
+export default Form;
